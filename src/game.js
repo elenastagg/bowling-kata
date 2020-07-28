@@ -1,65 +1,45 @@
 class BowlingGame {
   constructor() {
-    this.frames = [];
+    this.rolls = [];
   }
 
   roll(pins) {
-    if (this.lastFrame && this.lastFrame.length < 2) {
-      // Roll current go in the frame unless 2 turns have been taken then start new frame
-      if (this.lastFrame[0] === 10) {
-        this.lastFrame.push(0);
-        this.frames.push([]);
-      }
-      this.lastFrame.push(pins);
-    } else {
-      this.frames.push([pins]);
-    }
+    this.rolls.push(pins);
+  }
+
+  isSpare(frameScore) {
+    return frameScore === 10;
+  }
+  spareBonus(rollIndex) {
+    return 10 + this.rolls[rollIndex + 2];
+  }
+
+  isStrike(rollIndex) {
+    return this.rolls[rollIndex] === 10;
+  }
+
+  strikeBonus(rollIndex) {
+    return 10 + this.rolls[rollIndex + 1] + this.rolls[rollIndex + 2];
   }
 
   get score() {
     let score = 0;
-    this.frames.forEach((frame, i) => {
-      let currentFrameTotal;
-      if (frame !== this.eleventhFrame || frame !== this.twelfthFrame) {
-        // if frame 10 is strike, 11th frame is normal
-        currentFrameTotal = frame[0] + frame[1];
-      } // if frame 10 is spare, only add first roll of frame 11
-      else currentFrameTotal = frame[1] ? frame[0] + frame[1] : frame[0];
-      const previousFrame = this.frames[i - 1] || [];
-      const previousFrameTotal = previousFrame
-        ? previousFrame[0] + previousFrame[1]
-        : 0;
+    let rollIndex = 0;
 
-      console.log("previous frame  ", previousFrame);
-      console.log("currentFrameTotal ", currentFrameTotal);
-      console.log("Frame ", frame);
-
-      if (previousFrame[0] === 10) {
-        // if previous frame is strike
-        score += currentFrameTotal;
-      } else if (previousFrameTotal === 10) {
-        // if previous frame is spare
-
-        score += frame[0];
+    for (let frameCount = 0; frameCount < 10; frameCount += 1) {
+      const frameScore = this.rolls[rollIndex] + this.rolls[rollIndex + 1];
+      if (this.isStrike(rollIndex)) {
+        score += this.strikeBonus(rollIndex);
+        rollIndex += 1;
+      } else if (this.isSpare(frameScore)) {
+        score += this.spareBonus(rollIndex);
+        rollIndex += 2;
+      } else {
+        score += frameScore;
+        rollIndex += 2;
       }
-      score += currentFrameTotal;
-    });
-
+    }
     return score;
-  }
-
-  get lastFrame() {
-    return this.frames[this.frames.length - 1];
-  }
-
-  get tenthFrame() {
-    return this.frames[9];
-  }
-  get eleventhFrame() {
-    return this.frames[10];
-  }
-  get twelfthFrame() {
-    return this.frames[11];
   }
 }
 
